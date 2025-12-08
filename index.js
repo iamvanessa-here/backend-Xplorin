@@ -46,6 +46,8 @@ app.get('/', (req, res) => {
             login: 'POST /api/auth/login',
             profile: 'GET /api/auth/profile (requires token)',
             updateProfile: 'PUT /api/auth/profile (requires token)',
+            checkUsername: 'POST /api/auth/check-username (requires token)',
+            deleteProfilePicture: 'DELETE /api/auth/profile-picture (requires token)',
             test: 'GET /api/auth/test',
             // Review endpoints
             addReview: 'POST /api/reviews/add',
@@ -90,6 +92,8 @@ app.listen(PORT, () => {
     console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
     console.log(`   GET    http://localhost:${PORT}/api/auth/profile`);
     console.log(`   PUT    http://localhost:${PORT}/api/auth/profile`);
+    console.log(`   POST   http://localhost:${PORT}/api/auth/check-username`);
+    console.log(`   DELETE http://localhost:${PORT}/api/auth/profile-picture`);
     console.log(`   GET    http://localhost:${PORT}/api/auth/test`);
     console.log('   REVIEWS:');
     console.log(`   POST   http://localhost:${PORT}/api/reviews/add`);

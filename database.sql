@@ -1,37 +1,30 @@
--- ============================================
--- Xplorin Database Structure & Sample Data
--- Database untuk aplikasi eksplorasi kuliner
--- Created: December 3, 2025
--- ============================================
-
 -- Drop database jika sudah ada (HATI-HATI di production!)
 -- DROP DATABASE IF EXISTS xplorin_db;
 
--- Buat database baru
 CREATE DATABASE IF NOT EXISTS xplorin_db;
 USE xplorin_db;
 
--- ============================================
 -- Table: users
--- Menyimpan data pengguna aplikasi
--- ============================================
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL COMMENT 'Hashed password dengan bcryptjs',
     full_name VARCHAR(100) DEFAULT NULL,
-    phone VARCHAR(20) DEFAULT NULL,
+    phone_number VARCHAR(20) DEFAULT NULL COMMENT 'Phone number with country code',
+    date_of_birth DATE DEFAULT NULL COMMENT 'User date of birth',
+    country VARCHAR(100) DEFAULT NULL COMMENT 'Country name',
+    city VARCHAR(100) DEFAULT NULL COMMENT 'City name',
+    postal_code VARCHAR(20) DEFAULT NULL COMMENT 'Postal/ZIP code',
+    location VARCHAR(255) DEFAULT NULL COMMENT 'Full location string (City, Country)',
+    profile_picture MEDIUMTEXT DEFAULT NULL COMMENT 'Base64 encoded profile picture or URL',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email (email),
     INDEX idx_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- Table: restaurants
--- Menyimpan data restoran
--- ============================================
 CREATE TABLE IF NOT EXISTS restaurants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -52,10 +45,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- Table: foods
--- Menyimpan data menu makanan
--- ============================================
 CREATE TABLE IF NOT EXISTS foods (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -74,10 +64,7 @@ CREATE TABLE IF NOT EXISTS foods (
     INDEX idx_signature (is_signature)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
 -- Table: reviews
--- Menyimpan review dari user untuk restoran
--- ============================================
 CREATE TABLE IF NOT EXISTS reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -94,19 +81,14 @@ CREATE TABLE IF NOT EXISTS reviews (
     UNIQUE KEY unique_user_restaurant_review (user_id, restaurant_id) COMMENT 'Satu user hanya bisa review 1x per restoran'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
--- SAMPLE DATA - Users
--- Password default: "password123" (sudah di-hash)
--- ============================================
+-- Sample Data - Users
 INSERT INTO users (username, email, password, full_name, phone) VALUES
 ('admin', 'admin@xplorin.com', '$2a$10$rBV2NdNEPGNqCMnBYqPKTOxJqMQVrLKdNyLbCEV0qQ5WX6iE0L8pS', 'Admin Xplorin', '081234567890'),
 ('john_doe', 'john@example.com', '$2a$10$rBV2NdNEPGNqCMnBYqPKTOxJqMQVrLKdNyLbCEV0qQ5WX6iE0L8pS', 'John Doe', '081234567891'),
 ('jane_smith', 'jane@example.com', '$2a$10$rBV2NdNEPGNqCMnBYqPKTOxJqMQVrLKdNyLbCEV0qQ5WX6iE0L8pS', 'Jane Smith', '081234567892'),
 ('user_palembang', 'user@palembang.com', '$2a$10$rBV2NdNEPGNqCMnBYqPKTOxJqMQVrLKdNyLbCEV0qQ5WX6iE0L8pS', 'Warga Palembang', '081234567893');
 
--- ============================================
--- SAMPLE DATA - Restaurants
--- ============================================
+-- Sample Data - Restaurants
 INSERT INTO restaurants (name, description, location, phone, rating, total_reviews, image_url, category, price_range) VALUES
 ('Pempek Pak Raden', 'Pempek legendaris Palembang sejak 1980. Terkenal dengan kuah cekonya yang khas dan ikan belida asli.', 'Jl. Sudirman No. 123, Palembang', '0711-123456', 4.8, 150, '/images/restaurants/pempek-pak-raden.jpg', 'Pempek', '$$'),
 ('Tekwan Aling', 'Tekwan kuah bening dengan bakso ikan yang lembut. Cocok untuk sarapan pagi.', 'Jl. Kapten A. Rivai No. 45, Palembang', '0711-234567', 4.6, 98, '/images/restaurants/tekwan-aling.jpg', 'Tekwan', '$'),
@@ -119,9 +101,7 @@ INSERT INTO restaurants (name, description, location, phone, rating, total_revie
 ('Burgo Akang', 'Burgo kuah santan kental dengan irisan kelapa muda segar.', 'Jl. Rajawali No. 45, Palembang', '0711-901234', 4.5, 81, '/images/restaurants/burgo-akang.jpg', 'Burgo', '$'),
 ('Kemplang & Kerupuk Basah Melati', 'Aneka kerupuk khas Palembang dengan sambel tauco pedas.', 'Jl. Angkatan 45 No. 123, Palembang', '0711-012345', 4.3, 65, '/images/restaurants/kemplang-melati.jpg', 'Kerupuk', '$');
 
--- ============================================
--- SAMPLE DATA - Foods
--- ============================================
+-- Sample Data - Foods
 INSERT INTO foods (name, description, category, price, image_url, restaurant_id, is_signature) VALUES
 -- Pempek Pak Raden (Restaurant ID: 1)
 ('Pempek Kapal Selam', 'Pempek isi telur ayam dengan ukuran besar, disajikan dengan cuko asam manis pedas', 'Pempek', 15000.00, '/images/foods/pempek-kapal-selam.jpg', 1, TRUE),
@@ -161,54 +141,30 @@ INSERT INTO foods (name, description, category, price, image_url, restaurant_id,
 ('Kemplang Goreng', 'Kerupuk kemplang goreng renyah dengan sambel tauco', 'Kerupuk', 8000.00, '/images/foods/kemplang-goreng.jpg', 10, FALSE),
 ('Kerupuk Basah', 'Kerupuk basah dengan kuah cuko khas Palembang', 'Kerupuk', 10000.00, '/images/foods/kerupuk-basah.jpg', 10, TRUE);
 
--- ============================================
--- SAMPLE DATA - Reviews
--- ============================================
+-- Sample Data - Reviews
 INSERT INTO reviews (user_id, restaurant_id, rating, comment) VALUES
--- Reviews untuk Pempek Pak Raden
 (2, 1, 5, 'Pempek terenak yang pernah saya coba! Kuah cekonya pas banget, tidak terlalu asam. Pempek kapal selamnya super enak dengan telur yang besar.'),
 (3, 1, 5, 'Legendaris memang! Sudah langganan dari kecil. Ikannya asli dan teksturnya kenyal sempurna.'),
 (4, 1, 4, 'Enak banget, tapi agak pricey. Worth it sih untuk rasanya yang authentic.'),
-
--- Reviews untuk Tekwan Aling
 (2, 2, 5, 'Tekwan paling enak se-Palembang! Kuahnya bening tapi berasa banget. Bakso ikannya lembut.'),
 (3, 2, 4, 'Cocok buat sarapan. Porsinya pas dan harganya terjangkau.'),
-
--- Reviews untuk Model Gangan Cik Umi
 (4, 3, 5, 'Gangan ikan patinnya juara! Asam pedasnya bikin ketagihan.'),
 (2, 3, 5, 'Model ikan gabusnya recommended! Bumbunya meresap sempurna.'),
-
--- Reviews untuk Pindang Musi
 (3, 4, 4, 'Pindang patin enak, kuahnya segar. Tempatnya bersih dan nyaman.'),
 (4, 4, 5, 'Pindang baung terbaik! Ikannya segar dan bumbunya pas.'),
-
--- Reviews untuk Mie Celor Pak Janggut
 (2, 5, 5, 'MIE CELOR TERBAIK! Kuah santannya kental dan gurih. Udangnya besar-besar!'),
 (3, 5, 5, 'Wajib coba kalau ke Palembang! Porsinya banyak dan rasanya mantap.'),
 (4, 5, 5, 'Legendaris! Sudah 30 tahun rasanya tetap konsisten enak.'),
-
--- Reviews untuk Martabak HAR
 (2, 6, 5, 'Martabak paling enak di Palembang! Kejunya banyak banget.'),
 (4, 6, 4, 'Enak tapi harus sabar antri karena selalu rame.'),
-
--- Reviews untuk Laksan 88
 (3, 7, 4, 'Laksan enak dengan harga terjangkau. Kuah santannya pas.'),
 (4, 7, 5, 'Laksan favorit saya! Sounnya lembut dan kuahnya creamy.'),
-
--- Reviews untuk Celimpungan Sari Rasa
 (2, 8, 5, 'Celimpungan ikan gabusnya juara! Pedasnya mantap.'),
 (3, 8, 4, 'Enak, tapi porsinya agak kecil untuk harganya.'),
-
--- Reviews untuk Burgo Akang
 (4, 9, 5, 'Burgo terbaik! Kelapa mudanya segar dan kuahnya enak.'),
-
--- Reviews untuk Kemplang Melati
 (2, 10, 4, 'Kerupuk basahnya enak, cuko-nya pas pedasnya.');
 
--- ============================================
 -- STORED PROCEDURES (Optional - untuk automation)
--- ============================================
-
 DELIMITER //
 
 -- Procedure untuk update rating restaurant berdasarkan reviews
@@ -257,9 +213,7 @@ END //
 
 DELIMITER ;
 
--- ============================================
 -- Initial data untuk update ratings
--- ============================================
 CALL UpdateRestaurantRating(1);
 CALL UpdateRestaurantRating(2);
 CALL UpdateRestaurantRating(3);

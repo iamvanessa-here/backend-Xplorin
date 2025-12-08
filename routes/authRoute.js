@@ -4,7 +4,12 @@ const router = express.Router();
 // Import controllers
 const { loginUser } = require('../controller/login');
 const { registerUser } = require('../controller/register');
-const { getProfile, updateProfile } = require('../controller/profile');
+const { 
+    getProfile, 
+    updateProfile, 
+    checkUsername, 
+    removeProfilePicture 
+} = require('../controller/profile');
 
 // Import middleware
 const { 
@@ -29,6 +34,14 @@ router.get('/profile', verifyToken, getProfile);
 // PUT /api/auth/profile
 router.put('/profile', verifyToken, updateProfile);
 
+// Route untuk check username availability (protected route)
+// POST /api/auth/check-username
+router.post('/check-username', verifyToken, checkUsername);
+
+// Route untuk delete profile picture (protected route)
+// DELETE /api/auth/profile-picture
+router.delete('/profile-picture', verifyToken, removeProfilePicture);
+
 // Route untuk test endpoint (opsional)
 router.get('/test', (req, res) => {
     res.json({
@@ -39,14 +52,5 @@ router.get('/test', (req, res) => {
 });
 
 module.exports = router;
-
-// Route untuk test endpoint (opsional)
-router.get('/test', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Auth API is working!',
-        timestamp: new Date().toISOString()
-    });
-});
 
 module.exports = router;
