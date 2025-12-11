@@ -75,7 +75,7 @@ const validateRegisterInput = (req, res, next) => {
     next();
 };
 
-// Middleware opsional untukk validasi login input
+// Middleware opsional untuk validasi login input
 const validateLoginInput = (req, res, next) => {
     const { identifier, password } = req.body;
 
